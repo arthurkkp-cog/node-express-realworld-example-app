@@ -1,7 +1,5 @@
 package com.realworld.service;
 
-import com.realworld.dto.ArticleDTO;
-import com.realworld.dto.CreateArticleRequest;
 import com.realworld.entity.Article;
 import com.realworld.entity.Tag;
 import com.realworld.entity.User;
@@ -15,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 
 import java.time.Instant;
 import java.util.*;
@@ -52,36 +51,34 @@ class ArticleServiceTest {
         articleService = new ArticleService(articleRepository, userRepository, 
                 tagRepository, commentRepository, profileService);
 
-        testUser = User.builder()
-                .id(1L)
-                .email("test@example.com")
-                .username("testuser")
-                .password("hashedPassword")
-                .bio("Test bio")
-                .image("https://api.realworld.io/images/smiley-cyrus.jpeg")
-                .demo(false)
-                .followedBy(new HashSet<>())
-                .favorites(new HashSet<>())
-                .build();
+        testUser = new User();
+        testUser.setId(1L);
+        testUser.setEmail("test@example.com");
+        testUser.setUsername("testuser");
+        testUser.setPassword("hashedPassword");
+        testUser.setBio("Test bio");
+        testUser.setImage("https://api.realworld.io/images/smiley-cyrus.jpeg");
+        testUser.setDemo(false);
+        testUser.setFollowedBy(new HashSet<>());
+        testUser.setFavorites(new HashSet<>());
+        testUser.setFollowing(new HashSet<>());
 
-        testTag = Tag.builder()
-                .id(1L)
-                .name("test-tag")
-                .build();
+        testTag = new Tag();
+        testTag.setId(1L);
+        testTag.setName("test-tag");
 
-        testArticle = Article.builder()
-                .id(1L)
-                .slug("test-article-1")
-                .title("Test Article")
-                .description("Test description")
-                .body("Test body content")
-                .createdAt(Instant.now())
-                .updatedAt(Instant.now())
-                .author(testUser)
-                .tagList(new HashSet<>(Collections.singletonList(testTag)))
-                .favoritedBy(new HashSet<>())
-                .comments(new HashSet<>())
-                .build();
+        testArticle = new Article();
+        testArticle.setId(1L);
+        testArticle.setSlug("test-article-1");
+        testArticle.setTitle("Test Article");
+        testArticle.setDescription("Test description");
+        testArticle.setBody("Test body content");
+        testArticle.setCreatedAt(Instant.now());
+        testArticle.setUpdatedAt(Instant.now());
+        testArticle.setAuthor(testUser);
+        testArticle.setTagList(new HashSet<>(Collections.singletonList(testTag)));
+        testArticle.setFavoritedBy(new HashSet<>());
+        testArticle.setComments(new HashSet<>());
     }
 
     @Test
@@ -91,7 +88,7 @@ class ArticleServiceTest {
         AppException exception = assertThrows(AppException.class, () ->
                 articleService.getArticle("nonexistent", null));
 
-        assertEquals(404, exception.getStatus().value());
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
     }
 
     @Test
@@ -110,7 +107,7 @@ class ArticleServiceTest {
         AppException exception = assertThrows(AppException.class, () ->
                 articleService.deleteArticle("test-article-1", 999L));
 
-        assertEquals(403, exception.getStatus().value());
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
     }
 
     @Test
@@ -120,6 +117,6 @@ class ArticleServiceTest {
         AppException exception = assertThrows(AppException.class, () ->
                 articleService.deleteArticle("nonexistent", 1L));
 
-        assertEquals(404, exception.getStatus().value());
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
     }
 }

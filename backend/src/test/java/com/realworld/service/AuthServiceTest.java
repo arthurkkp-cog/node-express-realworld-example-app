@@ -13,8 +13,10 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.HashSet;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,14 +43,15 @@ class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
-        testUser = User.builder()
-                .id(1L)
-                .email("test@example.com")
-                .username("testuser")
-                .password("hashedPassword")
-                .bio("Test bio")
-                .image("https://api.realworld.io/images/smiley-cyrus.jpeg")
-                .build();
+        testUser = new User();
+        testUser.setId(1L);
+        testUser.setEmail("test@example.com");
+        testUser.setUsername("testuser");
+        testUser.setPassword("hashedPassword");
+        testUser.setBio("Test bio");
+        testUser.setImage("https://api.realworld.io/images/smiley-cyrus.jpeg");
+        testUser.setFollowedBy(new HashSet<>());
+        testUser.setFollowing(new HashSet<>());
     }
 
     @Test
@@ -59,11 +62,10 @@ class AuthServiceTest {
         when(userRepository.save(any(User.class))).thenReturn(testUser);
         when(jwtTokenProvider.generateToken(anyLong())).thenReturn("test-token");
 
-        RegisterRequest.UserData userData = RegisterRequest.UserData.builder()
-                .email("test@example.com")
-                .username("testuser")
-                .password("password123")
-                .build();
+        RegisterRequest.UserData userData = new RegisterRequest.UserData();
+        userData.setEmail("test@example.com");
+        userData.setUsername("testuser");
+        userData.setPassword("password123");
 
         UserDTO result = authService.createUser(userData);
 
@@ -78,16 +80,15 @@ class AuthServiceTest {
     void createUser_EmailAlreadyExists() {
         when(userRepository.existsByEmail("test@example.com")).thenReturn(true);
 
-        RegisterRequest.UserData userData = RegisterRequest.UserData.builder()
-                .email("test@example.com")
-                .username("testuser")
-                .password("password123")
-                .build();
+        RegisterRequest.UserData userData = new RegisterRequest.UserData();
+        userData.setEmail("test@example.com");
+        userData.setUsername("testuser");
+        userData.setPassword("password123");
 
         AppException exception = assertThrows(AppException.class, () ->
                 authService.createUser(userData));
 
-        assertEquals(422, exception.getStatus().value());
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatus());
         assertTrue(exception.getErrors().containsKey("email"));
     }
 
@@ -96,31 +97,29 @@ class AuthServiceTest {
         when(userRepository.existsByEmail(anyString())).thenReturn(false);
         when(userRepository.existsByUsername("testuser")).thenReturn(true);
 
-        RegisterRequest.UserData userData = RegisterRequest.UserData.builder()
-                .email("test@example.com")
-                .username("testuser")
-                .password("password123")
-                .build();
+        RegisterRequest.UserData userData = new RegisterRequest.UserData();
+        userData.setEmail("test@example.com");
+        userData.setUsername("testuser");
+        userData.setPassword("password123");
 
         AppException exception = assertThrows(AppException.class, () ->
                 authService.createUser(userData));
 
-        assertEquals(422, exception.getStatus().value());
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatus());
         assertTrue(exception.getErrors().containsKey("username"));
     }
 
     @Test
     void createUser_BlankEmail() {
-        RegisterRequest.UserData userData = RegisterRequest.UserData.builder()
-                .email("")
-                .username("testuser")
-                .password("password123")
-                .build();
+        RegisterRequest.UserData userData = new RegisterRequest.UserData();
+        userData.setEmail("");
+        userData.setUsername("testuser");
+        userData.setPassword("password123");
 
         AppException exception = assertThrows(AppException.class, () ->
                 authService.createUser(userData));
 
-        assertEquals(422, exception.getStatus().value());
+        assertEquals(HttpStatus.UNPROCESSABLE_ENTITY, exception.getStatus());
         assertTrue(exception.getErrors().containsKey("email"));
     }
 
@@ -130,10 +129,9 @@ class AuthServiceTest {
         when(passwordEncoder.matches("password123", "hashedPassword")).thenReturn(true);
         when(jwtTokenProvider.generateToken(1L)).thenReturn("test-token");
 
-        LoginRequest.UserData userData = LoginRequest.UserData.builder()
-                .email("test@example.com")
-                .password("password123")
-                .build();
+        LoginRequest.UserData userData = new LoginRequest.UserData();
+        userData.setEmail("test@example.com");
+        userData.setPassword("password123");
 
         UserDTO result = authService.login(userData);
 
@@ -147,30 +145,28 @@ class AuthServiceTest {
         when(userRepository.findByEmail("test@example.com")).thenReturn(Optional.of(testUser));
         when(passwordEncoder.matches("wrongpassword", "hashedPassword")).thenReturn(false);
 
-        LoginRequest.UserData userData = LoginRequest.UserData.builder()
-                .email("test@example.com")
-                .password("wrongpassword")
-                .build();
+        LoginRequest.UserData userData = new LoginRequest.UserData();
+        userData.setEmail("test@example.com");
+        userData.setPassword("wrongpassword");
 
         AppException exception = assertThrows(AppException.class, () ->
                 authService.login(userData));
 
-        assertEquals(403, exception.getStatus().value());
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
     }
 
     @Test
     void login_UserNotFound() {
         when(userRepository.findByEmail("nonexistent@example.com")).thenReturn(Optional.empty());
 
-        LoginRequest.UserData userData = LoginRequest.UserData.builder()
-                .email("nonexistent@example.com")
-                .password("password123")
-                .build();
+        LoginRequest.UserData userData = new LoginRequest.UserData();
+        userData.setEmail("nonexistent@example.com");
+        userData.setPassword("password123");
 
         AppException exception = assertThrows(AppException.class, () ->
                 authService.login(userData));
 
-        assertEquals(403, exception.getStatus().value());
+        assertEquals(HttpStatus.FORBIDDEN, exception.getStatus());
     }
 
     @Test
@@ -192,6 +188,6 @@ class AuthServiceTest {
         AppException exception = assertThrows(AppException.class, () ->
                 authService.getCurrentUser(999L));
 
-        assertEquals(404, exception.getStatus().value());
+        assertEquals(HttpStatus.NOT_FOUND, exception.getStatus());
     }
 }
