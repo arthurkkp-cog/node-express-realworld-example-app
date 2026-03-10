@@ -1,10 +1,10 @@
 # ![Node/Express/Prisma Example App](project-logo.png)
 
-[![Build Status](https://travis-ci.org/anishkny/node-express-realworld-example-app.svg?branch=master)](https://travis-ci.org/anishkny/node-express-realworld-example-app)
+[![Build Status](https://app.travis-ci.com/anishkny/node-express-realworld-example-app.svg?branch=master)](https://app.travis-ci.com/anishkny/node-express-realworld-example-app)
 
 > ### Example Node (Express + Prisma) codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://github.com/gothinkster/realworld-example-apps) API spec.
 
-<a href="https://thinkster.io/tutorials/node-json-api" target="_blank"><img width="454" src="https://raw.githubusercontent.com/gothinkster/realworld/master/media/learn-btn-hr.png" /></a>
+<a href="https://github.com/gothinkster/realworld" target="_blank"><img width="454" src="https://raw.githubusercontent.com/gothinkster/realworld/main/media/learn-btn-hr.png" /></a>
 
 ## Getting Started
 
